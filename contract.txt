@@ -1,0 +1,1 @@
+This is a non-disclosure agreement (NDA) between Party A, a software developer, and Party B, a client. Party A agrees not to disclose any confidential information received from Party B for a period of five (5) years from the effective date. In the event of a breach, Party A shall be liable for damages.

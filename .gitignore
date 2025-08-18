@@ -1,0 +1,10 @@
+Python virtual environment
+venv/
+
+Python cache files
+pycache/
+
+Secret keys and credentials
+*.json
+.env
+$env:GOOGLE_API_KEY = "AIzaSyDfrf2FlKVlG5D168azTpJoIyBXM93XoJc"
