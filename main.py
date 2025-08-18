@@ -3,18 +3,35 @@ from google.cloud import aiplatform
 from vertexai.generative_models import GenerativeModel
 import google.generativeai as genai
 import os
+from google.cloud import firestore
+from google.oauth2 import service_account
 
 # Create an instance of the FastAPI class.
 app = FastAPI()
 
 # --- Google Cloud & Model Configuration ---
 PROJECT_ID = "legal-guardian-ai"
-PROCESSOR_ID = "28999c7f79f9582d"
+PROCESSOR_ID = "28999c7f79f982d"
 LOCATION = "us-central1"
-GEMINI_MODEL_NAME = "models/gemini-2.5-pro"
+GEMINI_MODEL_NAME = "models/gemini-1.5-flash-latest"
 
 # --- API Keys & Credentials ---
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+# --- Database Initialization ---
+# Get the path to your credentials file from the environment variable.
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+# Check if the credentials path exists and create a Firestore client.
+if credentials_path:
+    try:
+        credentials = service_account.Credentials.from_service_account_file(credentials_path)
+        db = firestore.Client(project=PROJECT_ID, credentials=credentials)
+    except Exception:
+        db = None
+else:
+    # Fallback in case the credentials are not found.
+    db = None
 
 # --- AI & Parsing Functions ---
 def parse_document_pdf(file_content: bytes):
@@ -103,17 +120,27 @@ async def analyze_document(file: UploadFile):
 @app.post("/what-if-simulation")
 async def what_if_simulation(request: dict):
     """
-    Simulates a "what-if" scenario based on document text and a user's question.
+    Simulates a "what-if" scenario based on document text and a user's question,
+    with an optional user profile for personalization.
     """
     try:
         document_text = request.get("document_text")
         user_question = request.get("user_question")
+        user_profile = request.get("user_profile", {}) # Get profile or an empty dict
 
         if not document_text or not user_question:
             return {"status": "ERROR", "message": "Missing 'document_text' or 'user_question' in the request."}
 
+        # Dynamically build the prompt based on the user_profile.
+        personalization_details = ""
+        if user_profile:
+            personalization_details = f"The user is a {user_profile.get('occupation', 'person')} in {user_profile.get('location', 'their local area')}."
+
+        # Craft a specific prompt for the AI to handle the simulation.
         prompt = f"""
-        As an AI legal assistant, analyze the following legal document and answer the user's "what-if" question in simple, easy-to-understand language. Provide a clear explanation of the legal consequences based on the provided text.
+        As an AI legal assistant, analyze the following legal document and answer the user's "what-if" question in simple, easy-to-understand language.
+        {personalization_details}
+        Provide a clear explanation of the legal consequences based on the provided text.
 
         Document:
         {document_text}
@@ -124,7 +151,7 @@ async def what_if_simulation(request: dict):
         Answer:
         """
         
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME) 
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
         response = model.generate_content(prompt)
         simulation_result = response.text
 
@@ -135,3 +162,69 @@ async def what_if_simulation(request: dict):
         }
     except Exception as e:
         return {"status": "ERROR", "message": str(e)}
+
+@app.post("/store-document")
+async def store_document(file: UploadFile):
+    """
+    Processes and stores a document in Firestore.
+    """
+    try:
+        # Check if the database client is initialized.
+        if db is None:
+            return {"status": "ERROR", "message": "Firestore client not initialized. Check your credentials."}
+
+        content = await file.read()
+        parsed_text = content.decode("utf-8")
+        
+        # Use Gemini to generate a summary to save.
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+        prompt = f"Summarize this document:\n\n'{parsed_text}'"
+        response = model.generate_content(prompt)
+        summary = response.text
+
+        # Create a document in Firestore.
+        doc_ref = db.collection("legal-documents").document()
+        doc_ref.set({
+            "filename": file.filename,
+            "summary": summary,
+            "created_at": firestore.SERVER_TIMESTAMP
+        })
+
+        return {
+            "document_id": doc_ref.id,
+            "message": "Document and summary saved successfully.",
+            "status": "SUCCESS"
+        }
+    except Exception as e:
+        return {"status": "ERROR", "message": str(e)}
+    
+@app.get("/get-all-documents")
+def get_all_documents():
+    """
+    Retrieves all stored documents from the Firestore database.
+    """
+    try:
+        if db is None:
+            return {"status": "ERROR", "message": "Firestore client not initialized. Check your credentials."}
+
+        # Query the 'legal-documents' collection.
+        docs = db.collection('legal-documents').stream()
+        
+        documents = []
+        for doc in docs:
+            doc_data = doc.to_dict()
+            documents.append({
+                "document_id": doc.id,
+                "filename": doc_data.get("filename"),
+                "summary": doc_data.get("summary"),
+                "created_at": doc_data.get("created_at").isoformat() if doc_data.get("created_at") else None
+            })
+
+        return {
+            "status": "SUCCESS",
+            "count": len(documents),
+            "documents": documents
+        }
+    except Exception as e:
+        return {"status": "ERROR", "message": str(e)}
+
