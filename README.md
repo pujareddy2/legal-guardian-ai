@@ -4,46 +4,60 @@ This is the core backend for our hackathon project, Legal Guardian AI. This solu
 The core of this project is a FastAPI backend that acts as the central hub for all our services, including powerful Google AI models.
 
 🚀 Key Features Implemented
-Document Analysis: An endpoint that receives a document, parses it using Google's Document AI, and provides a simplified summary using the Gemini model.
+API Endpoints: A full set of RESTful APIs for the frontend to interact with.
 
-"What-If" Simulation: An endpoint that takes a legal document and a user's question, then provides a predictive analysis of the legal consequences.
+AI Integration: Connections to Google's Gemini AI for analysis and Document AI for document parsing.
 
-API Health Check: A simple endpoint to confirm that the server and API keys are working correctly.
+Data Storage: The ability to both store and retrieve data from a Firestore database, which is the foundation for our "Crowd-Sourced Legal Risk Index."
 
-🛠️ Getting Started (For Teammates)
+"What-If" Simulation: A unique feature that provides predictive analysis based on user questions.
+
+🛠️ Getting Started for Teammates
 Follow these steps to get a local copy of the project running on your machine:
 
-Clone the Repository:
+Clone the Repository: This gets a copy of the project onto your local machine.
 
 git clone https://github.com/pujareddy2/legal-guardian-ai-hackathon.git
 cd legal-guardian-ai-hackathon
 
-Set Up the Python Environment: Create a virtual environment to manage dependencies and install all the required libraries.
+Create a Branch: Create a new branch for your work to avoid conflicts.
+
+git checkout -b your-feature-name
+
+Set Up the Python Environment: Create a virtual environment and install all the required libraries from the requirements.txt file.
 
 python -m venv venv
-venv\Scripts\activate
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-Configure Your API Key: You must set your Google AI Studio API Key as an environment variable called GOOGLE_API_KEY.
+Configure Your Credentials: You must create a .env file and a credentials JSON file to securely access Google's services.
 
-On Windows (PowerShell): $env:GOOGLE_API_KEY = "YOUR_API_KEY"
+Create a file named .env in the project directory.
 
-On macOS/Linux: export GOOGLE_API_KEY="YOUR_API_KEY"
+Add your credentials to the file:
 
-(Note: You will also need to configure your Google Cloud credentials for Document AI, as outlined in the project documentation.)
+GOOGLE_API_KEY="YOUR_AI_STUDIO_API_KEY"
+GOOGLE_APPLICATION_CREDENTIALS="C:\legal-guardian-ai-hackathon\your-credentials-file.json"
+
+Make sure you have your credentials JSON file saved in the project directory.
 
 Run the Server: Start the FastAPI server.
 
-uvicorn main:app --reload
+uvicorn main:app --reload --env-file .env
 
 The server will be running at http://127.0.0.1:8000.
 
 📌 API Endpoints
 GET /: Welcome message.
 
-GET /status: Checks if the API key is working.
+GET /status: Checks if the API key is configured.
 
 POST /analyze-document: Upload a .txt or .pdf file.
 
-POST /what-if-simulation: Send a JSON body with a document and question for AI analysis.
+POST /what-if-simulation: Send a JSON body with a document and a question for AI analysis.
 
+POST /store-document: Upload a file to get an AI-powered summary and save it to Firestore.
+
+GET /get-all-documents: Retrieve all saved document summaries from Firestore.
+
+For any questions, please ask the team lead or refer to the documentation.
