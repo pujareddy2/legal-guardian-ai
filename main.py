@@ -227,4 +227,35 @@ def get_all_documents():
         }
     except Exception as e:
         return {"status": "ERROR", "message": str(e)}
+# ...existing code...
 
+from fastapi import File
+from fastapi.responses import FileResponse
+from google.cloud import texttospeech, speech
+
+@app.post("/read-aloud/")
+async def read_aloud(text: str):
+    client = texttospeech.TextToSpeechClient()
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+    voice = texttospeech.VoiceSelectionParams(language_code="en-US", ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL)
+    audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
+    response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+    with open("output.mp3", "wb") as out:
+        out.write(response.audio_content)
+    return FileResponse("output.mp3", media_type="audio/mpeg", filename="readaloud.mp3")
+
+@app.post("/speech-to-text/")
+async def speech_to_text(audio: UploadFile = File(...)):
+    client = speech.SpeechClient()
+    audio_bytes = await audio.read()
+    audio_config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        language_code="en-US"
+    )
+    audio_data = speech.RecognitionAudio(content=audio_bytes)
+    response = client.recognize(config=audio_config, audio=audio_data)
+    transcript = ""
+    for result in response.results:
+        transcript += result.alternatives[0].transcript
+    return {"transcript": transcript}
+# ...existing code...
