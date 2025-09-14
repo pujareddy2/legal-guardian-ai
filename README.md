@@ -1,11 +1,10 @@
-<<<<<<< HEAD
 # 📄 Legal Guardian AI: A Proactive AI Legal Assistant and Financial Guardian
 
 Legal Guardian AI is a revolutionary hackathon solution designed to **empower individuals and small businesses** by demystifying complex legal documents. The platform leverages **Google's advanced generative AI** to provide clear, actionable insights and proactive protection against legal and financial risks.
 
-Our backend is built with **FastAPI**, serving as a robust and scalable foundation that integrates multiple **Google Cloud services** to deliver an intelligent, secure, and user-friendly experience.
+The backend is built with **FastAPI**, serving as a robust and scalable foundation that integrates multiple **Google Cloud services** to deliver an intelligent, secure, and user-friendly experience.
 
----
+***
 
 ## ✨ Key Features
 
@@ -21,7 +20,7 @@ Our backend is built with **FastAPI**, serving as a robust and scalable foundati
 - **Robust API Endpoints**  
   A complete suite of RESTful APIs for frontend integration with the backend.
 
----
+***
 
 ## 🚀 Getting Started (For Developers)
 
@@ -74,7 +73,7 @@ The server will be available at:
 Interactive API documentation:  
 👉 `http://127.0.0.1:8000/docs`
 
----
+***
 
 ## 📌 API Reference
 
@@ -96,189 +95,153 @@ Interactive API documentation:
 ### **GET /get-all-documents**
 - **Description:** Retrieves a list of all stored document summaries from Firestore.
 
----
+***
 
-## 🛠 Tech Stack
-- **Backend:** FastAPI (Python)
-- **AI Models:** Google Generative AI (Gemini), Google Document AI
-- **Database:** Google Firestore
-- **Hosting/Infra:** Google Cloud Platform
+## 🤖 AI/ML Ops Features & Implementation
 
----
-
-## 👥 Contribution Guidelines
-1. Fork the repo and create a new feature branch.
-2. Commit your changes with clear messages.
-3. Push the branch and create a Pull Request.
-
----
-
-## 📜 License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-## 💡 Acknowledgements
-- **Google Cloud AI** for providing advanced AI capabilities.
-- **FastAPI** for making backend development fast and efficient.
-
-=======
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
->>>>>>> 4dacfc5 (Initial commit)
----
-
-# 🤖 AI/ML Ops Features & Implementation
-
-This section provides a detailed overview of the **AI/ML operations and backend setup** for Legal Guardian AI, including environment setup, model training, Firestore integration, predictive endpoints, and human-in-the-loop feedback.
-
----
-
-## 1. Environment Setup
+### 1. Environment Setup
 - Created a **Python virtual environment** (`venv`) and installed dependencies from `requirements.txt`.
 - Configured `.env` with Google Cloud credentials:
 ```env
 GOOGLE_APPLICATION_CREDENTIALS="path/to/credentials.json"
 GCP_PROJECT="your-gcp-project-id"
+```
 
----
-
-## 2. Firestore Setup
+### 2. Firestore Setup
 - Connected the application to **Google Firestore**.
 - Added sample documents to the `legal-documents` collection (case summaries, outcomes).
 - Verified documents and their IDs using:
 ```bash
 python list_firestore_docs.py
+```
 
----
-
-## 3. Predictive Legal Outcome Model
+### 3. Predictive Legal Outcome Model
 - Trained and saved ML models:
   - `legal_outcome_model.pkl`
   - `legal_outcome_vectorizer.pkl`
 - Integrated models with FastAPI (`main.py`) to enable endpoint predictions.
-- Tested `/predict-outcome` endpoint → returned predictions such as:
+- Tested `/predict-outcome` endpoint that returns predictions such as:
   - `"civil"`
   - `"criminal"`
   - `"won"`
   - `"lost"`
 
----
-
-## 4. Risk Index Analysis
+### 4. Risk Index Analysis
 - Implemented `/risk-index` endpoint in `legal_risk_index.py`.
-- Verified via **Swagger UI**:
-  - Returned total document count.
-  - `risk_index` currently empty (sample data lacked risky contract clauses).
-- **Next step:** Add contract-like text to Firestore to see actual risk percentages.
+- Verified via **Swagger UI** returning total document count.
+- Risk Index currently empty; next step is adding contract-like text to Firestore for real risk percentages.
 
----
-
-## 5. Human-in-the-Loop Feedback
+### 5. Human-in-the-Loop Feedback
 - Implemented `/feedback` endpoint in `human_in_loop.py`.
-- Successfully posted feedback using PowerShell:
+- Feedback posting tested using PowerShell:
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:8000/feedback -Method POST -Body '{"doc_id": "123", "feedback": "Useful summary"}'
+```
 
----
-
-## 6. API Testing
-- Ran the server:
+### 6. API Testing
+- Server run command:
 ```bash
 uvicorn main:app --reload --env-file .env
-- Verified Firestore for stored documents and feedback.
+```
+- Verified Firestore entries for documents and feedback.
 
----
+### 7. Working Files in Repository
 
-## 7. Working Files in Repository
-
-| File | Purpose |
-|------|---------|
-| `add_sample_data.py` | Inserts initial Firestore documents |
-| `train_predictive_model.py` | Trains and saves ML models |
+| File                         | Purpose                          |
+|------------------------------|---------------------------------|
+| `add_sample_data.py`          | Inserts initial Firestore documents |
+| `train_predictive_model.py`   | Trains and saves ML models       |
 | `predictive_legal_outcome_model.py` | Prediction logic for outcomes |
-| `legal_risk_index.py` | Computes clause-based risk index |
-| `human_in_loop.py` | Handles human feedback |
-| `check_feedback.py` | Verifies feedback entries in Firestore |
-| `list_firestore_docs.py` | Lists all Firestore documents |
-| `verify_firestore_data.py` | Checks inserted data correctness |
-| `main.py` | FastAPI entry point with all routes |
-| `contract.txt` | Sample contract for testing risk clauses |
+| `legal_risk_index.py`         | Computes clause-based risk index |
+| `human_in_loop.py`            | Handles human feedback           |
+| `check_feedback.py`           | Verifies feedback entries        |
+| `list_firestore_docs.py`      | Lists all Firestore documents    |
+| `verify_firestore_data.py`    | Checks inserted data correctness |
+| `main.py`                    | FastAPI entry point with all routes |
+| `contract.txt`               | Sample contract for testing risk clauses |
 
----
-
-## 8. Key Implementations
-- **ML model integration:** Trained, saved, and integrated with FastAPI.
+### 8. Key Implementations
+- **ML model integration:** Trained and integrated with FastAPI.
 - **Outcome prediction:** Fully functional endpoint.
-- **Risk Index:** Endpoint live; needs realistic contract data.
+- **Risk Index:** Live endpoint needing realistic contract data.
 - **Human feedback loop:** Tested and stored in Firestore.
-- **Scripts for Firestore:** Insert, verify, and fetch documents and feedback.
+- **Firestore scripts:** Insert, verify, and fetch documents and feedback.
 
+***
+
+## 🛡 Privacy, Security, and Integrations
+
+Run the following commands and scripts to enable privacy, security features, and integrations:
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+setx GOOGLE_API_KEY "AIzaSyDfrf2FlKVlG5D168azTpJoIyBXM93XoJc"
+setx GOOGLE_APPLICATION_CREDENTIALS "C:\legal_guardian_ai\legal-guardian-ai-f17d58e71811.json"
+```
+
+1) **Dynamic Privacy Shield (PII Redaction)**
+```powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\ADMIN\legal-guardian-ai-hackathon\legal-guardian-ai-f17d58e71811.json"
+python redact_entities.py
+```
+
+2) **Homomorphic Encryption (HE) Integration**
+```bash
+python homomorphic_encryption_test.py
+```
+
+3) **Blockchain-Based Document Integrity**
+```bash
+python blockchain.py
+```
+
+4) **Biometric Signature Verification**
+Run app and upload images/signature via API docs:  
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) — Select images and upload signature.
+
+5) **External Service Integrations (Mocked APIs for Lawyer Networks)**
+```bash
+python lawyer_api_integration.py
+```
+
+6) Additional NLP entity processing:
+```bash
+python nlp_entities.py
+```
+
+***
+
+## 🛠 Tech Stack
+
+- **Backend:** FastAPI (Python)  
+- **AI Models:** Google Generative AI (Gemini), Google Document AI  
+- **Database:** Google Firestore  
+- **Hosting/Infra:** Google Cloud Platform  
+
+***
+
+## 👥 Contribution Guidelines
+
+1. Fork the repo and create a new feature branch.  
+2. Commit your changes with clear messages.  
+3. Push the branch and create a Pull Request.
+
+***
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+***
+
+## 💡 Acknowledgements
+
+- **Google Cloud AI** for providing advanced AI capabilities.  
+- **FastAPI** for making backend development fast and efficient.
+
+***
+
+This combined README merges project introduction, features, setup instructions, technical and AI/ML operation details, plus privacy/security implementation instructions for ease of reference and development guidance.

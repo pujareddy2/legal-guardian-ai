@@ -1,0 +1,29 @@
+THE BASIC STEPS
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+crenditials
+
+1)Dynamic Privacy Shield (PII Redaction)
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\ADMIN\legal-guardian-ai-hackathon\legal-guardian-ai-f17d58e71811.json"
+python redact_entities.py 
+
+2) Homomorphic Encryption (HE) Integration
+python homomorphic_encryption_test.py
+
+3)Blockchain-Based Document Integrity
+python blockchain.py 
+
+4)Biometric Signature Verification
+app.py
+http://127.0.0.1:8000/docs
+select imagesw and signature gets uploaded
+
+5) External Service Integrations (Mocking APIs for Lawyer Networks)
+python lawyer_api_integration.py
+
+6)Blockchain-Based Document Integrity
+python nlp_entities.py

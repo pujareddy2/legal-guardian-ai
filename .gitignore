@@ -1,36 +1,19 @@
-<<<<<<< HEAD
-Python virtual environment
+{
+  "type": "service_account",
+  "project_id": "legal-guardian-privacy",
+  "private_key_id": "9dd5fcdb54ee7c798ccad8763d9d84f0cff96569",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDi1s7VujgIKy4R\nQA2DkAKHJr4KW52l/p1zYgod1GVodTMi6YuhE9Z0lwwglwhjNwXMzFNrwv8Y8PGz\n9QuOxwE7Dgk5rax5wWNF20TyCtrlxQ9TQgjpSjm9pGs54xqe43Au8MgKJ8xEKNLA\n4W58xIMMftdl7u2Z2wRYHoe5cW2ahN6h8VotJfeefgGG3pvXxos2mg3PGNRbrKPE\nlkDC0NwU/xGLqXvxW44562BaJm6GiRiTc+OBxPcx2bjPf5tpyS+vs1bjjgQ3mbKx\nDBzszsv4y7ZrCzozI2Wa3GAolrh9zPQGKa9CK4Qg6LzJyRw0j6E2EGy+m40wG+Xb\nnjmk8BNlAgMBAAECggEANN0MnMBmGHk/piOAQr3H6Qk9VpqdNbcNqHsbknISI/LU\nNPmqYaKG4urkl5+7A6wp/N1NP5rU6lIUcfTUebSk88dEnR19SW6pHPmJqsKe2tc+\nyA9mlj+HD0wG9RmY9ZhZZ4cTh1JZBzVgUDT5E7iUNdBFkGrLEoT5ETQkOzJU8aI/\nBoMf+XjPNKsUZ4pF73NHBgafQBW2GY8jpCDKo40JNFeFnLjuOSv8WZ66RiW1LnM7\nm+8lw7DNbdCU5FKLF35lAlLdFMPLsZA4kxLRLXC14YmSxeA0u2pV+Gi1/Kt8EzGa\nsQRE3sHL69YHnS9P3oukZTKsmGUQJTM8JKoVr6rCbQKBgQD4AGwYTCsZinv2jJyJ\nbaUgmI1uHNbKGMlUPNQHEKAg5ejgVuVXRVhEz8cC9KT38o1m0wsijvk2lvpqL3Ev\n3HnJrhGSotmYbH1CgBwFo7ywKBrul9eUpfeJ3SwQUNtFe5aara3w/JehLxK2MKvi\n5Vxs5eTclmQfVcUa5EOEJo7NqwKBgQDqJ6lAy8wB6A3kYch99i/bZrEROkMkrEwz\nkUWj6JqeTB9T+3uRAB57a8zWZo/fZwnSyTJES4oC504W6UfODzALu6vMzrHD2lUB\noG3zHA0KkDfBrsd1BCThCrr7fe6xmhPsLwQM7v4pFNXIl+RM8InleCDwkZXwUiC7\nHIcaxX3zLwKBgQDIORcMWtplKYBBom5zKbmqYl+06cWjrnVE9EM+XPba+KOWE7Hf\nTpYgIBwNT9SsdgAhZvvTb9jWcPhFqH3aZUdSQ53eZGoG/Hf4q5N0HiillAuCW8bq\nNUBv5se/eHg/VbNWuCf5qwUEVgvmWc88RW7kYIrwaN72yXlz55x24eZjNwKBgQCb\nuwMLUD9/aRmMMiiI9epATl0nawtq4ZjQlyas66+h5ljTnydAecbMKRcT5SR83Weg\nJCXlXCQO6E18WWxjNKCsvQV28mUyMAxnR464qIhX5TDgBOEtBzOL5HoVd10AC8yC\nQYa9H1o0cmH4xmSVc0kTL8EgnoMNUWHpcAC/ImgxCwKBgQDGAFkfF81dibD/HSmX\n3hq0nOiyKAygmR1udTzHnYZySWu5RTUuikFDXJH2IXhF+wg8u7fKJKMpYR8UbR32\nfEkyFQCWGtjunroqTXluX4QDStXEFxuWiMtmaXyd99Csl6IUrsvdHvuc1D7zBn3H\nRehZ7xAc3YUohFTd1eIyzv6g3w==\n-----END PRIVATE KEY-----\n",
+  "client_email": "dlp-service-account@legal-guardian-privacy.iam.gserviceaccount.com",
+  "client_id": "112352409768031394204",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dlp-service-account%40legal-guardian-privacy.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+
+
+# Git ignore file to prevent pushing secrets
 venv/
-
-Python cache files
-pycache/
-
-Secret keys and credentials
 *.json
 .env
-$env:GOOGLE_API_KEY = "AIzaSyDfrf2FlKVlG5D168azTpJoIyBXM93XoJc"
-=======
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
->>>>>>> 4dacfc5 (Initial commit)
+}
