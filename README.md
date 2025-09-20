@@ -62,16 +62,30 @@ Create a `.env` file in the project root directory and add your credentials:
 GOOGLE_API_KEY="YOUR_AI_STUDIO_API_KEY"
 GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\your\credentials-file.json"
 ```
-
-### 6. Run the Development Server
+### 6. Set Up the Frontend (React)
+This installs all the JavaScript libraries.
 ```bash
-uvicorn main:app --reload --env-file .env
+npm install
+```
+
+### 7. Run the Development Server
+You need to run two servers in two separate terminals from your project folder.
+Terminal 1: Start the Backend
+```bash
+uvicorn main:app --reload
+```
+Terminal 2: Start the Frontend
+```bash
+npm start
 ```
 The server will be available at:  
 👉 `http://127.0.0.1:8000`
 
 Interactive API documentation:  
 👉 `http://127.0.0.1:8000/docs`
+
+The Frontend Website:
+👉 `http://localhost:3000`
 
 ***
 
