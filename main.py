@@ -1,284 +1,151 @@
-from fastapi import FastAPI, UploadFile, Form, Body
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, UploadFile, File, Body
+from fastapi.middleware.cors import CORSMiddleware
 import os
-from google.oauth2 import service_account
-from google.cloud import firestore
+import json
+from collections import defaultdict
 
-# Generative AI imports
+# --- NEW: We only need the dotenv library to find our secure JSON key ---
+# ... your existing imports
+import os 
+from dotenv import load_dotenv
+load_dotenv()
+
+# --- ADD THESE FOUR LINES ---
+print("--- DEBUGGING AUTH ---")
+key_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+print(f"Attempting to use key file from path: {key_path}")
+print("----------------------")
+
+# Google Cloud
+from google.cloud.documentai_v1 import DocumentProcessorServiceClient, RawDocument, ProcessRequest
+# ... rest of your code
+
+# Google Cloud
+from google.cloud.documentai_v1 import DocumentProcessorServiceClient, RawDocument, ProcessRequest
+from google.api_core.client_options import ClientOptions
+# --- GEMINI API IMPORT ---
 import google.generativeai as genai
-from vertexai.generative_models import GenerativeModel
-from google.cloud.documentai_v1 import DocumentProcessorServiceClient, RawDocument
 
-# Presidio redaction
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
-
-# Accessibility (replace with your implementations)
-from accessibility import synthesize_text_to_speech, transcribe_audio_to_text
-
-# --- FastAPI App ---
+# --- FastAPI App Initialization ---
 app = FastAPI()
 
+# --- CORS Configuration ---
+origins = [ "http://localhost:3000", "http://127.0.0.1:3000" ]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # --- Google Cloud & Model Configuration ---
+# NOTE: We no longer need the GOOGLE_API_KEY. 
+# The genai library will automatically use your GOOGLE_APPLICATION_CREDENTIALS file.
 PROJECT_ID = "legal-guardian-ai"
-PROCESSOR_ID = "28999c7f79f982d"
-LOCATION = "us-central1"
-GEMINI_MODEL_NAME = "models/gemini-1.5-flash-latest"
+PROCESSOR_ID = "28999c7f79f9582d"
+LOCATION = "us"
 
-# --- API Keys & Credentials ---
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# --- Database Initialization ---
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-if credentials_path:
-    try:
-        credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        db = firestore.Client(project=PROJECT_ID, credentials=credentials)
-    except Exception as e:
-        print("Failed to initialize Firestore client:", e)
-        db = None
-else:
-    db = None
-
-# --- Presidio Engines Initialization ---
-analyzer = AnalyzerEngine()
-anonymizer = AnonymizerEngine()
-
-def redact_sensitive_data(text):
-    results = analyzer.analyze(
-        text=text,
-        language='en',
-        entities=["PERSON", "CREDIT_CARD", "PHONE_NUMBER", "EMAIL_ADDRESS"]
-    )
-    anonymized = anonymizer.anonymize(
-        text=text,
-        analyzer_results=results,
-        operators={"DEFAULT": {"type": "replace", "new_value": "[REDACTED]"}}
-    )
-    return anonymized.text
-
+# --- Helper Function 1: Calls Document AI ---
 def parse_document_pdf(file_content: bytes):
+    """Processes PDF with your custom Document AI model."""
     try:
-        client = DocumentProcessorServiceClient()
+        opts = ClientOptions(api_endpoint=f"{LOCATION}-documentai.googleapis.com")
+        client = DocumentProcessorServiceClient(client_options=opts)
         processor_name = client.processor_path(PROJECT_ID, LOCATION, PROCESSOR_ID)
+
         raw_document = RawDocument(content=file_content, mime_type="application/pdf")
-        request = {"name": processor_name, "raw_document": raw_document}
-        response = client.process_document(request=request)
-        document = response.document
-        return document.text
+        request = ProcessRequest(name=processor_name, raw_document=raw_document)
+        result = client.process_document(request=request)
+        doc = result.document
+
+        entities = []
+        for entity in doc.entities:
+            entities.append({
+                "label": entity.type_, "value": entity.mention_text, "confidence": entity.confidence,
+            })
+        return {"status": "SUCCESS", "entities": entities, "full_text": doc.text}
     except Exception as e:
-        return f"ERROR: {str(e)}"
+        return {"status": "ERROR", "message": str(e)}
+
+# --- Helper Function 2: Organizes the Results ---
+def structure_entities(entities_list):
+    """Takes the raw list of entities and groups them for a clean output."""
+    grouped_entities = defaultdict(list)
+    for entity in entities_list:
+        cleaned_value = entity.get("value", "").replace("\n", " ").strip()
+        grouped_entities[entity.get("label")].append(cleaned_value)
+    
+    final_data = {}
+    for label, values in grouped_entities.items():
+        if len(values) == 1:
+            final_data[label] = values[0]
+        else:
+            final_data[label] = values
+    return final_data
+
+# --- API Routes (Endpoints) ---
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello, World! Legal Guardian AI backend is running."}
-
-@app.get("/analyze-legal-text")
-def analyze_legal_text():
-    sample_text = "This Agreement shall be governed by and construed in accordance with the laws of the State of California."
-    try:
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-        prompt = f"Explain this legal sentence in simple, easy-to-understand language for a beginner:\n\n'{sample_text}'"
-        response = model.generate_content(prompt)
-        simplified_text = getattr(response, "text", str(response))
-        return {
-            "original_text": sample_text,
-            "simplified_explanation": simplified_text,
-            "status": "SUCCESS"
-        }
-    except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
-
-@app.get("/status")
-def read_status():
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if api_key:
-        return {"status": "SUCCESS", "message": "Google AI Studio API key is set and ready."}
-    else:
-        return {"status": "ERROR", "message": "GOOGLE_API_KEY environment variable not found."}
+    return {"message": "✅ Legal Guardian AI backend is running."}
 
 @app.post("/analyze-document")
-async def analyze_document(file: UploadFile):
+async def analyze_document(file: UploadFile = File(...)):
+    """Receives a PDF, gets structured data from Document AI, AND gets a summary from Gemini."""
     try:
         content = await file.read()
-        file_extension = file.filename.split('.')[-1].lower()
-        if file_extension == 'pdf':
-            parsed_text = parse_document_pdf(content)
-        else:
-            parsed_text = content.decode("utf-8", errors="replace")
+        parsed_result = parse_document_pdf(content)
+        if parsed_result["status"] == "ERROR":
+            return parsed_result
 
-        if parsed_text is None:
-            return {"status": "ERROR", "message": "No text parsed from document."}
-        if isinstance(parsed_text, str) and parsed_text.lower().startswith("error"):
-            return {"status": "ERROR", "message": parsed_text}
-
-        # Redact sensitive data before analysis
-        redacted_text = redact_sensitive_data(parsed_text)
-
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-        prompt = f"Analyze the following legal document and provide a summary of the key points in simple language:\n\n{redacted_text}"
-        response = model.generate_content(prompt)
-        simplified_summary = getattr(response, "text", str(response))
+        entities = parsed_result.get("entities", [])
+        structured_output = structure_entities(entities)
+        full_text = parsed_result.get("full_text", "")
+        
+        summary = "Summary could not be generated."
+        if full_text:
+            try:
+                model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                prompt = f"Please provide a simple, one-paragraph 'plain English' summary of this legal document. Focus on the main purpose and key obligations:\n\n---\n\n{full_text}"
+                response = model.generate_content(prompt)
+                summary = response.text
+            except Exception as e:
+                summary = f"Error generating summary: {str(e)}"
 
         return {
-            "filename": file.filename,
-            "summary": simplified_summary,
-            "status": "SUCCESS"
+            "status": "SUCCESS", "filename": file.filename, "structured_data": structured_output,
+            "summary": summary, "full_text": full_text
         }
     except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
+        return {"status": "ERROR", "message": f"An unexpected error occurred: {str(e)}"}
 
-@app.post("/what-if-simulation")
-async def what_if_simulation(request: dict = Body(...)):
+@app.post("/ask-question")
+async def ask_question(request: dict = Body(...)):
+    """Receives document text and a question, and gets an answer from Gemini."""
+    document_text = request.get("document_text")
+    question = request.get("question")
+
+    if not all([document_text, question]):
+        return {"status": "ERROR", "message": "Missing document text or question."}
+    
     try:
-        document_text = request.get("document_text")
-        user_question = request.get("user_question")
-        user_profile = request.get("user_profile", {})
-
-        if not document_text or not user_question:
-            return {"status": "ERROR", "message": "Missing 'document_text' or 'user_question'."}
-
-        personalization_details = ""
-        if user_profile:
-            occupation = user_profile.get('occupation', 'person')
-            location = user_profile.get('location', 'their local area')
-            personalization_details = f"The user is a {occupation} in {location}."
-
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         prompt = f"""
-As an AI legal assistant, analyze the following legal document and answer the user's "what-if" question in simple, easy-to-understand language.
-{personalization_details}
-Provide a clear explanation of the legal consequences based on the provided text.
+        You are a helpful legal assistant. Based ONLY on the provided document text below, answer the user's question.
+        If the answer cannot be found in the document, state that clearly. Do not make up information.
 
-Document:
-{document_text}
+        DOCUMENT TEXT:
+        ---
+        {document_text}
+        ---
 
-User's "What-if" Question:
-{user_question}
-
-Answer:
-"""
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+        USER'S QUESTION:
+        "{question}"
+        """
         response = model.generate_content(prompt)
-        simulation_result = getattr(response, "text", str(response))
-
-        return {
-            "user_question": user_question,
-            "simulation_result": simulation_result,
-            "status": "SUCCESS"
-        }
+        return {"status": "SUCCESS", "answer": response.text}
     except Exception as e:
         return {"status": "ERROR", "message": str(e)}
 
-@app.post("/store-document")
-async def store_document(file: UploadFile, outcome_label: int = Form(...)):
-    try:
-        if db is None:
-            return {"status": "ERROR", "message": "Firestore client not initialized. Check your credentials."}
 
-        content = await file.read()
-        parsed_text = content.decode("utf-8", errors="replace")
-
-        # Redact sensitive data before processing
-        redacted_text = redact_sensitive_data(parsed_text)
-
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-        prompt = f"Summarize this document:\n\n{redacted_text}"
-        response = model.generate_content(prompt)
-        summary = getattr(response, "text", str(response))
-
-        doc_ref = db.collection("legal-documents").document()
-        doc_ref.set({
-            "filename": file.filename,
-            "summary": summary,
-            "outcome_label": outcome_label,
-            "created_at": firestore.SERVER_TIMESTAMP
-        })
-
-        return {
-            "document_id": doc_ref.id,
-            "message": "Document, summary, and label saved successfully.",
-            "status": "SUCCESS"
-        }
-    except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
-
-@app.get("/get-all-documents")
-def get_all_documents():
-    try:
-        if db is None:
-            return {"status": "ERROR", "message": "Firestore client not initialized. Check your credentials."}
-        docs = db.collection('legal-documents').stream()
-        documents = []
-        for doc in docs:
-            doc_data = doc.to_dict()
-            created_at = doc_data.get("created_at")
-            documents.append({
-                "document_id": doc.id,
-                "filename": doc_data.get("filename"),
-                "summary": doc_data.get("summary"),
-                "created_at": created_at.isoformat() if created_at else None
-            })
-        return {
-            "status": "SUCCESS",
-            "count": len(documents),
-            "documents": documents
-        }
-    except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
-
-@app.post("/text-to-speech")
-async def get_audio_from_text(request: dict = Body(...)):
-    try:
-        simplified_text = request.get("simplified_text")
-        if not simplified_text:
-            return {"status": "ERROR", "message": "Missing 'simplified_text' in the request."}
-
-        audio_content = synthesize_text_to_speech(simplified_text)
-        if not isinstance(audio_content, (bytes, bytearray)):
-            return {"status": "ERROR", "message": "synthesize_text_to_speech must return bytes audio content."}
-
-        return StreamingResponse(
-            iter([audio_content]),
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": "attachment; filename=output.mp3"}
-        )
-    except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
-
-@app.post("/speech-to-text")
-async def transcribe_audio_file(file: UploadFile):
-    try:
-        audio_content = await file.read()
-        transcribed_text = transcribe_audio_to_text(audio_content)
-
-        if transcribed_text:
-            return {
-                "status": "SUCCESS",
-                "transcribed_text": transcribed_text
-            }
-        else:
-            return {
-                "status": "ERROR",
-                "message": "Transcription failed or no text found."
-            }
-    except Exception as e:
-        return {"status": "ERROR", "message": str(e)}
-
-# Optional: Include routers if modules exist
-try:
-    from legal_risk_index import router as risk_router
-    app.include_router(risk_router)
-except Exception as e:
-    print("Could not include legal_risk_index router:", e)
-
-try:
-    from predictive_legal_outcome_model import router as plom_router
-    app.include_router(plom_router)
-except Exception as e:
-    print("Could not include predictive_legal_outcome_model router:", e)
-
-try:
-    from human_in_loop import router as hil_router
-    app.include_router(hil_router)
-except Exception as e:
-    print("Could not include human_in_loop router:", e)
