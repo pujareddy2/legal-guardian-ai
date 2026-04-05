@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import aiplatform
 from vertexai.generative_models import GenerativeModel
 import google.generativeai as genai
@@ -6,8 +7,31 @@ import os
 from google.cloud import firestore
 from google.oauth2 import service_account
 
+def _load_cors_origins():
+    configured = os.getenv("CORS_ORIGINS", "").strip()
+    if configured:
+        return [origin.strip() for origin in configured.split(",") if origin.strip()]
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+
+def _load_cors_regex():
+    return os.getenv("CORS_ORIGIN_REGEX", r"https://.*\\.vercel\\.app")
+
+
 # Create an instance of the FastAPI class.
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_load_cors_origins(),
+    allow_origin_regex=_load_cors_regex(),
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Google Cloud & Model Configuration ---
 PROJECT_ID = "legal-guardian-ai"
