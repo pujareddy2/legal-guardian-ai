@@ -192,13 +192,13 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 
-setx GOOGLE_API_KEY "AIzaSyDfrf2FlKVlG5D168azTpJoIyBXM93XoJc"
-setx GOOGLE_APPLICATION_CREDENTIALS "C:\legal_guardian_ai\legal-guardian-ai-f17d58e71811.json"
+setx GOOGLE_API_KEY "YOUR_GOOGLE_API_KEY"
+setx GOOGLE_APPLICATION_CREDENTIALS "C:\\path\\to\\your-service-account.json"
 ```
 
 1) **Dynamic Privacy Shield (PII Redaction)**
 ```powershell
-$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\ADMIN\legal-guardian-ai-hackathon\legal-guardian-ai-f17d58e71811.json"
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\\path\\to\\your-service-account.json"
 python redact_entities.py
 ```
 

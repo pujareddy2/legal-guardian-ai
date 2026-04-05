@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.log
+.git/
+.gitignore
+venv/
+.env
+node_modules/
+build/
+legal-ai-frontend/
+uploaded_files/
+uploaded_signatures/
+outputs/

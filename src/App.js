@@ -146,6 +146,7 @@ const SignaturePad = ({ onSave }) => {
 };
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -194,7 +195,7 @@ function App() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/analyze-document', { method: 'POST', body: formData });
+      const response = await fetch(`${API_BASE_URL}/analyze-document`, { method: 'POST', body: formData });
       const data = await response.json();
       if (data.status === 'SUCCESS') {
         setAnalysisResult(data);
@@ -211,7 +212,7 @@ function App() {
     if (!question || !documentText) return;
     setIsAsking(true); setAnswer('');
     try {
-        const response = await fetch('http://127.0.0.1:8000/ask-question', {
+        const response = await fetch(`${API_BASE_URL}/ask-question`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ document_text: documentText, question: question })
         });
