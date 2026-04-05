@@ -1,1 +1,6 @@
-{"ignore": ["*.py"], "builds": [{"src": "frontend/package.json", "use": "@vercel/react"}]}
+{
+	"framework": "create-react-app",
+	"installCommand": "npm install",
+	"buildCommand": "npm run build",
+	"outputDirectory": "build"
+}
