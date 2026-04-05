@@ -1,8 +1,33 @@
-# Exclude Python files and non-essential directories
+# Python backend files
+requirements.txt
+main.py
+app.py
 *.py
+Dockerfile
+.dockerignore
+.gcloudignore
+deploy-gcloud.sh
+deploy-to-gcloud.sh
+
+# Python cache
 __pycache__/
+*.pyc
+*.pyo
 venv/
-node_modules/
+env/
+.env
+.env.*
+
+# Other
+.git
+.github
+*.egg-info
+dist
+build
+.pytest_cache
+.coverage
+htmlcov/
+.vercel
 .DS_Store
-.idea/
-.vscode/
+npm-debug.log
+yarn-error.log
