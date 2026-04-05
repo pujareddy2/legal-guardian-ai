@@ -48,11 +48,16 @@ function App() {
     }
   };
 
+  const structuredEntries = Object.entries(result?.structured_data || {});
+
   return (
     <div className="app-root">
       <header className="top-nav">
         <div className="brand">LEGAL GUARDIAN</div>
-        <div className="nav-pill">AI Contract Studio</div>
+        <div className="nav-right">
+          <span className="nav-pill">AI Contract Studio</span>
+          <span className="nav-pill subtle">For Startups and Freelancers</span>
+        </div>
       </header>
 
       <main className="hero">
@@ -66,6 +71,10 @@ function App() {
             <span>Fast PDF Analysis</span>
             <span>Simple Language Summary</span>
             <span>Built for Real Contracts</span>
+          </div>
+          <div className="hero-actions">
+            <button className="play-btn">Start Free Scan</button>
+            <span className="meta">No signup required for first analysis</span>
           </div>
         </section>
 
@@ -84,7 +93,7 @@ function App() {
       </main>
 
       <section className="content-rows">
-        <h3>What You Get</h3>
+        <h3>Featured Capabilities</h3>
         <div className="row-grid">
           <article className="mini-card">
             <h4>Plain Summary</h4>
@@ -103,17 +112,41 @@ function App() {
 
       {result && (
         <section className="result-wrap">
-          <div className="result-card">
+          <div className="result-card reveal delay-1">
             <h3>Summary</h3>
             <p>{result.summary || 'No summary returned.'}</p>
           </div>
 
-          <div className="result-card">
+          <div className="result-card reveal delay-2">
             <h3>Extracted Fields</h3>
-            <pre>{JSON.stringify(result.structured_data || {}, null, 2)}</pre>
+            {structuredEntries.length === 0 ? (
+              <p>No extracted fields returned.</p>
+            ) : (
+              <div className="field-grid">
+                {structuredEntries.map(([key, value], index) => (
+                  <article className={`field-card reveal delay-${(index % 4) + 1}`} key={key}>
+                    <h4>{key}</h4>
+                    {Array.isArray(value) ? (
+                      <ul>
+                        {value.map((item, idx) => (
+                          <li key={`${key}-${idx}`}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>{String(value)}</p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
+
+      <footer className="footer-strip">
+        <span>Legal Guardian AI</span>
+        <span>Cinematic Contract Intelligence</span>
+      </footer>
     </div>
   );
 }
